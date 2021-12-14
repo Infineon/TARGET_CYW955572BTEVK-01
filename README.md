@@ -2,22 +2,30 @@
 
 ### Overview
 
-The Cypress CYW955572BTEVK-01 Evaluation Kit enables you to evaluate and develop single-chip Bluetooth applications using the CYW55572, an ultra-low-power dual-mode Bluetooth 5.2 wireless MCU device. The CYW55572 is a stand-alone baseband processor with an integrated 2.4 GHz transceiver supporting Bluetooth LE. The CYW55572 employs high integration to reduce external components, thereby minimizing the device's footprint and cost. This kit helps evaluate device functionality and develop applications quickly for faster time-to-market.
+The Infineon CYW955572BTEVK-01 Evaluation Kit enables you to evaluate and develop Bluetooth&#174; applications using the AIROC&#8482; CYW55572 high-performance Wi-Fi 6/6E (11ax) and Bluetooth&#174; combo. The CYW5557x product family includes an integrated Bluetooth&#174; subsystem with Arm&#174; Cortex&#174;-M33 supporting BR/EDR/Bluetooth&#174; and isochronous channels for LE audio. This kit helps evaluate, develop, and debug embdedded Bluetooth&#174; applications quickly for faster time-to-market.
 
-* CYW55572 FCBGA - M.2 30x30mm form-factor, iPA/iLNA, BT5.2 board
-* Audio Arduino shield with on-board analog microphones, audio codec chip, headphone and speaker output
-* On-board sensors – an ambient light sensor, thermistor, and footprint for an Infineon digital microphone
-* USB connector for power, programming and USB-UART bridge
+### Kit Features
+
+* AIROC&#8482; CYW55572 Wi-Fi 6 (11ax) + Bluetooth&#174; combo chip
+* Audio Arduino shield with on-board analog microphones, audio codec chip, headphone, and speaker output
+* On-board sensors - an ambient light sensor, thermistor, and footprint for an Infineon digital microphone
+* USB connector for power, programming, and USB-UART bridge
 
 ### Kit Contents
 
 * CYW9BTM2BASE1 base board
-* CYW955572M2BT Bluetooth radio card (mounted on the base board)
-* CYW9BT Audio 3 Arduino shield (pre-assembled on top of the CYW9BTM2BASE1)
+* CYW955572M2BT1LV radio card (mounted on the base board)
+* CYW9BT Audio 3 Arduino shield
 * USB Standard-A to Micro-B cable
 * Power Adapter
 
 ### Additional Information
 
 * Max UART baud rate is 3M.
-* ADC\_INPUT\_P0 used in the hal/adc code example routes to D7 on the board, J4 pin 1. when the AUDIO3 shield is used, this routes to the CUSTOM button on the shield.
+
+## Additional Notes:
+The CYW955572BTEVK-01 is used with the audio shield board and the CUSTOM button on the shield board is configured for input by default. Also note that LED outputs are not available for this kit
+
+### ATTENTION!
+
+The Infineon CYW955572BTEVK-01 Evaluation Kit is enabled for programming for only a few seconds after a recovery reset. For best programming results, add "UART=COMXX" (or "UART=/dev/ttyXX" for Linux or macOS) to the application makefile, replacing "UART=AUTO". Replace XX with the proper HCI port name that is attached to the kit. This will skip the serial device port scan and begin the CYW55572 device programming immediately.

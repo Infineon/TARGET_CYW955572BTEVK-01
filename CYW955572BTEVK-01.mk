@@ -61,6 +61,10 @@ CY_INTERNAL_BASELIB_PATH?=$(patsubst %/,%,$(CY_BASELIB_PATH))
 override CY_DEVICESUPPORT_SEARCH_PATH:=$(call CY_MACRO_SEARCH,devicesupport.xml,$(CY_INTERNAL_BASELIB_PATH))
 endif
 
+# declare which stack version to use in COMPONENT folders
+COMPONENTS+=btstack_v3
+DISABLE_COMPONENTS+=gatt_utils_lib
+
 #
 # Define the features for this target
 #
@@ -75,8 +79,6 @@ KITPROG3_BRIDGE=1
 # Entry-point symbol for application
 CY_CORE_APP_ENTRY:=spar_crt_setup
 
-# this is a platform value, need to determine underlying logic to calculate a safe value
-PLATFORM_DIRECT_LOAD_BASE_ADDR = 0x230000
 #
 # TARGET UART parameters
 #
@@ -84,8 +86,6 @@ PLATFORM_DIRECT_LOAD_BASE_ADDR = 0x230000
 CY_CORE_DEFINES+=-DHCI_UART_MAX_BAUD=3000000
 # default baud rate is 3M, that is the max supported on macOS
 CY_CORE_DEFINES+=-DHCI_UART_DEFAULT_BAUD=3000000
-# nor user buttons
-CY_CORE_DEFINES+=-DNO_BUTTON_SUPPORT
 
 #
 # TARGET swd interface setup
@@ -102,11 +102,8 @@ CY_CORE_DEFINES+=-DUSE_PLATFORM_BUTTON_CONFIG
 #
 # Patch variables
 #
-ifeq ($(CHIP_REV),A1)
-CY_CORE_PATCH_DIR=$(CY_INTERNAL_BASELIB_PATH)/internal/$(CY_TARGET_DEVICE)/patches/xip/CM
-else
-CY_CORE_PATCH_DIR=$(CY_INTERNAL_BASELIB_PATH)/internal/$(CY_TARGET_DEVICE)/patches/fcbga_iPA_dLNA/CM
-endif
+LIFE_CYCLE_STATE?=DM
+CY_CORE_PATCH_DIR=$(CY_INTERNAL_BASELIB_PATH)/internal/$(CY_TARGET_DEVICE)/patches/fcbga_iPA_dLNA/$(LIFE_CYCLE_STATE)
 CY_CORE_PATCH=$(CY_CORE_PATCH_DIR)/patch.elf
 CY_CORE_PATCH_CERT=$(CY_CORE_PATCH_DIR)/patch_cert.hex
 CY_CORE_PATCH_SEC_XIP_MDH=$(CY_CORE_PATCH_DIR)/patch_sec_xip.mdh
@@ -122,12 +119,53 @@ CY_CORE_PATCH_LIB_PATH=libraries/prebuilt
 CY_CORE_HDF=$(CY_INTERNAL_BASELIB_PATH)/internal/$(CY_TARGET_DEVICE)/configdef$(CY_TARGET_DEVICE).hdf
 CY_CORE_HCI_ID=$(CY_INTERNAL_BASELIB_PATH)/platforms/IDFILE.txt
 CY_CORE_CGSLIST+=$(CY_INTERNAL_BASELIB_PATH)/platforms/platform.cgs
-ifeq ($(CHIP_REV),A1)
-CY_CORE_BTP=$(CY_INTERNAL_BASELIB_PATH)/platforms/flash.btp
-CY_CORE_MINIDRIVER=$(CY_CORE_PATCH_DIR)/minidriver.hex
-else
 CY_CORE_BTP=$(CY_INTERNAL_BASELIB_PATH)/platforms/ram.btp
-CY_CORE_MINIDRIVER=$(CY_INTERNAL_BASELIB_PATH)/platforms/minidriver.hex
+ifneq ($(LIFE_CYCLE_STATE),DM)
+  CY_CORE_MINIDRIVER=$(CY_INTERNAL_BASELIB_PATH)/platforms/minidriver.hex
+else
+  CY_CORE_MINIDRIVER=$(CY_INTERNAL_BASELIB_PATH)/platforms/secure_loader_dm.hex
 endif
 
 CY_CORE_LD_DEFS+=NUM_PATCH_ENTRIES=0
+
+DISABLE_COMPONENTS += bsp_design_modus #it will remove when cycfg_pins.c is correct
+
+#
+# read in BTP file as single source of flash layout information
+#
+define \n
+
+
+endef
+
+define extract_btp_file_value
+$(patsubst $1=%,%,$(filter $1%,$2))
+endef
+
+# these make targets do not need this data and don't work if importing an app
+# that has not yet run make getlibs, so skip it
+ifeq ($(filter import_deps getlibs get_app_info,$(MAKECMDGOALS)),)
+
+# override core-make buggy CY_SPACE till it's fixed
+CY_EMPTY=
+CY_SPACE=$(CY_EMPTY) $(CY_EMPTY)
+
+# split up btp file into "x=y" text
+CY_BT_FILE_TEXT:=$(shell cat -e $(CY_CORE_BTP))
+CY_BT_FILE_TEXT:=$(subst $(CY_SPACE),,$(CY_BT_FILE_TEXT))
+CY_BT_FILE_TEXT:=$(subst ^M,,$(CY_BT_FILE_TEXT))
+CY_BT_FILE_TEXT:=$(patsubst %$(\n),% ,$(CY_BT_FILE_TEXT))
+CY_BT_FILE_TEXT:=$(subst $$,$(CY_SPACE),$(CY_BT_FILE_TEXT))
+
+ifeq ($(CY_BT_FILE_TEXT),)
+$(error Failed to parse BTP variables from file: $(CY_CORE_BTP))
+endif
+
+SS_LOCATION = $(call extract_btp_file_value,DLConfigSSLocation,$(CY_BT_FILE_TEXT))
+VS_LOCATION = $(call extract_btp_file_value,DLConfigVSLocation,$(CY_BT_FILE_TEXT))
+VS_LENGTH = $(call extract_btp_file_value,DLConfigVSLength,$(CY_BT_FILE_TEXT))
+DS_LOCATION = $(call extract_btp_file_value,ConfigDSLocation,$(CY_BT_FILE_TEXT))
+
+PLATFORM_DIRECT_LOAD_BASE_ADDR = $(SS_LOCATION)
+
+endif # end filter import_deps getlibs get_app_info
