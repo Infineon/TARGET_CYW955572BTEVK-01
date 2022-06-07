@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+# Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
 # an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
 #
 # This software, including source code, documentation and related
@@ -38,7 +38,7 @@ endif
 #
 # Device definition
 #
-DEVICE=CYW55572MIFFBGT
+DEVICE=CYW55572MIFFBG
 CHIP=55572
 CHIP_REV?=A1
 BLD=A
@@ -47,6 +47,7 @@ BLD=A
 CY_TARGET_DEVICE?=$(CHIP)$(CHIP_REV)
 CY_APP_PATCH_LIBS+=$(CY_$(CY_TARGET_DEVICE)_APP_PATCH_LIBS)
 COMPONENTS+=$(CY_TARGET_DEVICE) $(COMPONENTS_$(CY_TARGET_DEVICE))
+#$(info in bsp makefile COMPONENTS=$(COMPONENTS) )
 ifeq ($(SEARCH_$(CY_TARGET_DEVICE)),)
 # internal only - app deploys will always initialize this in mtb.mk
 SEARCH_$(CY_TARGET_DEVICE)?=$(IN_REPO_BTSDK_ROOT)/wiced_btsdk/dev-kit/baselib/$(CY_TARGET_DEVICE)
@@ -62,6 +63,9 @@ override CY_DEVICESUPPORT_SEARCH_PATH:=$(call CY_MACRO_SEARCH,devicesupport.xml,
 endif
 
 # declare which stack version to use in COMPONENT folders
+ifeq ($(filter bsp_design_modus%,$(COMPONENTS)),)
+COMPONENTS+=bsp_design_modus
+endif
 COMPONENTS+=btstack_v3
 DISABLE_COMPONENTS+=gatt_utils_lib
 
@@ -96,9 +100,6 @@ CY_CORE_DEFINES+=-DSWD_CLK=SWDCK_ON_P11
 CY_CORE_DEFINES+=-DSWD_IO=SWDIO_ON_P15
 endif
 
-# Use generated platform button configurations.
-CY_CORE_DEFINES+=-DUSE_PLATFORM_BUTTON_CONFIG
-
 #
 # Patch variables
 #
@@ -127,8 +128,6 @@ else
 endif
 
 CY_CORE_LD_DEFS+=NUM_PATCH_ENTRIES=0
-
-DISABLE_COMPONENTS += bsp_design_modus #it will remove when cycfg_pins.c is correct
 
 #
 # read in BTP file as single source of flash layout information

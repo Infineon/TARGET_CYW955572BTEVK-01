@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2021, Cypress Semiconductor Corporation (an Infineon company) or
+ * Copyright 2016-2022, Cypress Semiconductor Corporation (an Infineon company) or
  * an affiliate of Cypress Semiconductor Corporation.  All rights reserved.
  *
  * This software, including source code, documentation and related
@@ -103,6 +103,8 @@ wiced_platform_gpio_config_t;
 //! Number of LEDs available on the platform.
 typedef enum
 {
+    WICED_PLATFORM_LED_1,
+    WICED_PLATFORM_LED_2,
     WICED_PLATFORM_LED_MAX,
 } wiced_platform_led_number_t;
 
@@ -112,6 +114,7 @@ typedef enum
     WICED_PLATFORM_BUTTON_1,
     WICED_PLATFORM_BUTTON_2,
     WICED_PLATFORM_BUTTON_3,
+    WICED_PLATFORM_BUTTON_4,
     WICED_PLATFORM_BUTTON_MAX,
 } wiced_platform_button_number_t;
 
@@ -176,6 +179,7 @@ typedef enum platform_button
     PLATFORM_BUTTON_1 = WICED_PLATFORM_BUTTON_1,
     PLATFORM_BUTTON_2 = WICED_PLATFORM_BUTTON_2,
     PLATFORM_BUTTON_3 = WICED_PLATFORM_BUTTON_3,
+    PLATFORM_BUTTON_4 = WICED_PLATFORM_BUTTON_4,
     PLATFORM_BUTTON_MAX = WICED_PLATFORM_BUTTON_MAX,
 } platform_button_t;
 

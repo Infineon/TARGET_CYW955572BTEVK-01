@@ -24,7 +24,7 @@ The Infineon CYW955572BTEVK-01 Evaluation Kit enables you to evaluate and develo
 * Max UART baud rate is 3M.
 
 ## Additional Notes:
-The CYW955572BTEVK-01 is used with the audio shield board and the CUSTOM button on the shield board is configured for input by default. Also note that LED outputs are not available for this kit
+The CYW955572BTEVK-01 is used with the audio shield board and the CUSTOM button on the shield board is configured for input by default.
 
 ### ATTENTION!
 
